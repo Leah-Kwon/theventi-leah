@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>theVenti Overseas Business Matrix Structure</title>
+  <style>
+    :root {
+      --bg-1: #090914;
+      --bg-2: #101021;
+      --line-solid: rgba(210, 200, 255, 0.15);
+      --line-dashed: rgba(255, 171, 117, 0.19);
+      --text: #f5f2ff;
+      --muted: #b9b0d3;
+      --purple: #9d84ff;
+      --blue: #78c8ff;
+      --orange: #ffad73;
+      --green: #82d9b2;
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+      --manager-border: rgba(157,132,255,0.50);
+      --senior-manager-border: rgba(120,200,255,0.58);
+      --assistant-border: rgba(255,173,115,0.48);
+      --associate-border: rgba(130,217,178,0.42);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Pretendard, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(157,132,255,0.12), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(255,173,115,0.08), transparent 18%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2));
+      min-height: 100vh;
+      padding: 28px 20px 48px;
+    }
+
+    .page {
+      max-width: 1560px;
+      min-width: 1380px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--purple);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.12;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 22px 0 28px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-line {
+      width: 28px;
+      height: 0;
+      border-top: 1.2px solid var(--line-solid);
+    }
+
+    .legend-line.dashed {
+      border-top-style: dashed;
+      border-top-color: var(--line-dashed);
+    }
+
+    .legend-chip {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .senior-manager-chip { background: var(--blue); }
+    .manager-chip { background: var(--purple); }
+    .assistant-chip { background: var(--orange); }
+    .associate-chip { background: var(--green); }
+
+    .chart-shell {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 30px;
+      padding: 68px 24px 40px;
+      box-shadow: var(--shadow);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .chart-toolbar {
+      position: sticky;
+      top: 14px;
+      z-index: 30;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 14px;
+      pointer-events: none;
+    }
+
+    .chart-toolbar-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 999px;
+      background: rgba(11,11,22,0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+      backdrop-filter: blur(12px);
+      pointer-events: auto;
+    }
+
+    .toolbar-btn,
+    .zoom-indicator {
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .toolbar-btn {
+      min-width: 34px;
+      padding: 0 12px;
+      cursor: pointer;
+      transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+    }
+
+    .toolbar-btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.16);
+      transform: translateY(-1px);
+    }
+
+    .zoom-indicator {
+      min-width: 64px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      color: var(--muted);
+    }
+
+    .chart-viewport {
+      position: relative;
+      width: max-content;
+      transform-origin: top left;
+      will-change: transform;
+      transition: transform 0.18s ease;
+    }
+
+    .chart {
+      position: relative;
+      min-height: 1100px;
+      min-width: 1320px;
+    }
+
+    .svg-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
+    }
+
+    .svg-layer path,
+    .svg-layer circle {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .node-layer {
+      position: relative;
+      z-index: 2;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 54px;
+    }
+
+    .parts-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.16fr) minmax(0, 0.84fr);
+      gap: 34px;
+      align-items: start;
+    }
+
+    .part {
+      position: relative;
+      min-height: 870px;
+      padding: 20px 18px 24px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* Compact layout for smaller organizational blocks */
+    .part.compact {
+      min-height: 640px;
+      padding: 16px 16px 20px;
+      max-width: 560px;
+      justify-self: end;
+    }
+
+    .part-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    #part-planning .part-title {
+      background: rgba(157,132,255,0.08);
+      border-color: rgba(157,132,255,0.18);
+      box-shadow: 0 0 18px rgba(157,132,255,0.08);
+    }
+
+    #part-operations .part-title {
+      background: rgba(120,200,255,0.08);
+      border-color: rgba(120,200,255,0.18);
+      box-shadow: 0 0 18px rgba(120,200,255,0.07);
+    }
+
+    .part-title .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--purple));
+    }
+
+    .part-head {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .lane-grid.planning {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .lane-grid.operations {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .lane {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+    }
+
+    .lane-head {
+      width: 100%;
+      text-align: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .node {
+      width: 240px;
+      min-width: 240px;
+      max-width: 240px;
+      min-height: 252px;
+      padding: 16px 16px 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      position: relative;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .node:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 0 22px rgba(157,132,255,0.14), 0 14px 28px rgba(0,0,0,0.26);
+    }
+
+    .node[data-person]:hover .avatar-slot,
+    .node[data-person]:focus-within .avatar-slot {
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.10), 0 0 18px rgba(157,132,255,0.20);
+      border-color: rgba(255,255,255,0.24);
+    }
+
+    .node[data-person]:hover .name,
+    .node[data-person]:focus-within .name {
+      text-shadow: 0 0 10px rgba(157,132,255,0.16);
+    }
+
+    .node.team-lead {
+      width: 280px;
+      min-width: 280px;
+      max-width: 280px;
+      min-height: 282px;
+      border-color: rgba(120,200,255,0.72);
+      box-shadow: 0 0 0 1px rgba(120,200,255,0.38), 0 0 28px rgba(120,200,255,0.12), 0 16px 34px rgba(0,0,0,0.28);
+      background: linear-gradient(180deg, rgba(120,200,255,0.08), rgba(255,255,255,0.03));
+    }
+
+    .node.team-lead:hover {
+      box-shadow: 0 0 0 1px rgba(120,200,255,0.46), 0 0 34px rgba(120,200,255,0.22), 0 18px 38px rgba(0,0,0,0.30);
+    }
+
+    .node.part-lead {
+      width: 260px;
+      min-width: 260px;
+      max-width: 260px;
+      min-height: 266px;
+    }
+
+    .node.senior-manager {
+      border-color: var(--senior-manager-border);
+      box-shadow: 0 0 0 1px rgba(120,200,255,0.35), 0 10px 24px rgba(0,0,0,0.22);
+    }
+
+    .node.manager {
+      border-color: var(--manager-border);
+    }
+
+    .node.assistant {
+      border-color: var(--assistant-border);
+      min-height: 240px;
+    }
+
+    .node.associate {
+      border-color: var(--associate-border);
+      min-height: 232px;
+    }
+
+    .node.matrix-eligible::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      border: 1px dashed rgba(255,255,255,0.16);
+      pointer-events: none;
+    }
+
+    .avatar-slot {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border: 1px dashed rgba(255,255,255,0.18);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .avatar-slot.empty::before {
+      content: 'TBD';
+      letter-spacing: 0.08em;
+      color: rgba(245,242,255,0.56);
+    }
+
+    .avatar-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 28%;
+      display: block;
+      transform: scale(1.08);
+    }
+
+    .avatar-input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    #node-kyle .avatar-slot img {
+      object-position: center 18%;
+      transform: scale(1.18);
+    }
+
+    #node-leah .avatar-slot img {
+      object-position: center 18%;
+      transform: scale(1.12);
+    }
+
+    #node-nina .avatar-slot img {
+      object-position: center 18%;
+      transform: scale(1.14);
+    }
+
+    #node-zoey .avatar-slot img {
+      object-position: center 24%;
+      transform: scale(1.1);
+    }
+
+    #node-victor .avatar-slot img {
+      object-position: center 12%;
+      transform: scale(1.22);
+    }
+
+    #node-jenna .avatar-slot img {
+      object-position: center 18%;
+      transform: scale(1.12);
+    }
+
+    #node-faye .avatar-slot img {
+      object-position: center 18%;
+      transform: scale(1.1);
+    }
+
+    #node-mason .avatar-slot img {
+      object-position: center 16%;
+      transform: scale(1.18);
+    }
+
+    #node-moel .avatar-slot img {
+      object-position: center 12%;
+      transform: scale(1.24);
+    }
+
+    #node-braun .avatar-slot img {
+      object-position: center 12%;
+      transform: scale(1.22);
+    }
+
+    
+    .rank {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+      min-height: 12px;
+    }
+
+    .senior-manager .rank { color: #aee3ff; }
+    .manager .rank { color: #d3c7ff; }
+    .assistant .rank { color: #ffd1ac; }
+    .associate .rank { color: #b9f0d9; }
+
+    .name {
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.24;
+      letter-spacing: -0.01em;
+      min-height: 42px;
+      max-height: 42px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: keep-all;
+    }
+
+    .assistant .name { font-size: 16px; }
+    .associate .name { font-size: 15px; }
+
+    .role {
+      margin-top: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--muted);
+      min-height: 34px;
+      max-height: 34px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: keep-all;
+    }
+
+    .duty {
+      margin-top: 10px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #ddd7f4;
+      min-height: 34px;
+      max-height: 34px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      text-align: center;
+      padding: 0 2px;
+    }
+
+    .tag-row {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-height: 22px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #f4efff;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+
+    .tag.country {
+      background: rgba(157,132,255,0.14);
+      border-color: rgba(157,132,255,0.22);
+    }
+
+    .tag.sv-badge {
+      background: rgba(120,200,255,0.12);
+      border-color: rgba(120,200,255,0.24);
+      color: #d9f2ff;
+    }
+
+    .tag.matrix {
+      background: rgba(255,173,115,0.12);
+      border-color: rgba(255,173,115,0.20);
+    }
+
+    .divider-note {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #978fb0;
+    }
+
+    .tooltip-panel {
+      position: fixed;
+      right: 24px;
+      bottom: 22px;
+      width: min(430px, calc(100vw - 32px));
+      max-height: min(76vh, 720px);
+      overflow: auto;
+      padding: 18px 18px 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(17,17,33,0.96), rgba(10,10,22,0.98));
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 20px 44px rgba(0,0,0,0.34);
+      backdrop-filter: blur(14px);
+      z-index: 20;
+    }
+
+    .tooltip-eyebrow {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 10px;
+    }
+
+    .tooltip-name {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.24;
+    }
+
+    .tooltip-role {
+      margin-top: 7px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .tooltip-list {
+      list-style: none;
+      margin: 12px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .tooltip-list li {
+      position: relative;
+      padding-left: 14px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #ede8ff;
+    }
+
+    .tooltip-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), var(--purple));
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 18px 10px 28px;
+      }
+
+      .page {
+        min-width: 1320px;
+      }
+
+      .tooltip-panel {
+        right: 12px;
+        bottom: 12px;
+        width: min(360px, calc(100vw - 24px));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="eyebrow">theVenti Global Structure</div>
+      <h1 class="title">theVenti Overseas Business Matrix Structure</h1>
+    </header>
+
+    <section class="legend">
+      <div class="legend-item"><span class="legend-line"></span> Direct Reporting</div>
+      <div class="legend-item"><span class="legend-line dashed"></span> Matrix Reporting to Kyle</div>
+      <div class="legend-item"><span class="legend-chip senior-manager-chip"></span> Senior Manager</div>
+      <div class="legend-item"><span class="legend-chip manager-chip"></span> Manager</div>
+      <div class="legend-item"><span class="legend-chip assistant-chip"></span> Assistant Manager</div>
+      <div class="legend-item"><span class="legend-chip associate-chip"></span> Associate</div>
+      </div>
+    </section>
+
+    <section class="chart-shell" id="chartShell">
+      <div class="chart-toolbar">
+        <div class="chart-toolbar-group">
+          <button class="toolbar-btn" id="zoomOutBtn" type="button" aria-label="축소">−</button>
+          <div class="zoom-indicator" id="zoomIndicator">100%</div>
+          <button class="toolbar-btn" id="zoomInBtn" type="button" aria-label="확대">＋</button>
+          <button class="toolbar-btn" id="zoomResetBtn" type="button">Reset</button>
+        </div>
+      </div>
+      <div class="chart-viewport" id="chartViewport">
+      <div class="chart" id="chartRoot">
+        <svg class="svg-layer" id="lineLayer" aria-hidden="true"></svg>
+
+        <div class="node-layer">
+          <div class="top-row">
+            <article class="node manager team-lead" id="node-kyle" data-node data-person="kyle">
+              <div class="avatar-slot"><img src="https://i.postimg.cc/hQq0wsBs/Kyle.png" alt="Kyle 강길호" /></div>
+              <div class="rank">General Manager</div>
+              <div class="name">Kyle 강길호</div>
+              <div class="role">Head of Overseas Business</div>
+              <div class="duty">글로벌 진출 전략·파트너십 총괄<br>사업 운영 및 조직 방향 리드</div>
+              <div class="tag-row">
+                <span class="tag matrix">Global Control Tower</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="parts-row">
+            <section class="part" id="part-planning">
+              <div class="part-title"><span class="dot"></span>Part 1 · Planning &amp; Support</div>
+              <div class="part-head">
+                <article class="node senior-manager part-lead" id="node-leah" data-node data-person="leah">
+                  <div class="avatar-slot"><img src="https://i.postimg.cc/30HZ61Tn/Leah.png" alt="Leah 권수정" /></div>
+                  <div class="rank">Senior Manager</div>
+                  <div class="name">Leah 권수정</div>
+                  <div class="role">Planning / BD / Branding Lead</div>
+                  <div class="duty">사업개발·전략기획 리드<br>브랜딩·로컬라이징 총괄</div>
+                </article>
+              </div>
+
+              <div class="lane-grid planning">
+                <div class="lane" id="lane-menu">
+                  <div class="lane-head">Menu Strategy Line</div>
+                  <article class="node manager" id="node-nina" data-node data-person="nina">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/XBcg05j5/Nina.jpg" alt="Nina 김수연" /></div>
+                    <div class="rank">Manager</div>
+                    <div class="name">Nina 김수연</div>
+                    <div class="role">Menu Strategy</div>
+                    <div class="duty">국가별 메뉴 전략 수립<br>포트폴리오 및 출시 관리</div>
+                    <div class="tag-row"></div>
+                  </article>
+                  <article class="node assistant" id="node-zoey" data-node data-person="zoey">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/vxLvdnY2/Zoey.jpg" alt="Zoey 황윤전" /></div>
+                    <div class="rank">Assistant Manager</div>
+                    <div class="name">Zoey 황윤전</div>
+                    <div class="role">Menu Development</div>
+                    <div class="duty">메뉴 개발·테스트 운영<br>현지화 메뉴 실행 지원</div>
+                    <div class="tag-row"></div>
+                  </article>
+                </div>
+
+                <div class="lane" id="lane-design">
+                  <div class="lane-head">Interior Design Line</div>
+                  <article class="node manager" id="node-victor" data-node data-person="victor">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/sG9JRWjw/Victor.jpg" alt="Victor 조용선" /></div>
+                    <div class="rank">Manager</div>
+                    <div class="name">Victor 조용선</div>
+                    <div class="role">Interior Design</div>
+                    <div class="duty">해외 매장 인테리어 검토<br>감리 방향 및 기준 관리</div>
+                    <div class="tag-row"></div>
+                  </article>
+                  <article class="node assistant" id="node-jenna" data-node data-person="jenna">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/JHWQgxLK/Jenna.jpg" alt="Jenna 김정은" /></div>
+                    <div class="rank">Assistant Manager</div>
+                    <div class="name">Jenna 김정은</div>
+                    <div class="role">Design</div>
+                    <div class="duty">브랜드 시각 자산 기획<br>매장·프로모션 비주얼 지원</div>
+                    <div class="tag-row"></div>
+                  </article>
+                </div>
+
+                <div class="lane" id="lane-marketing">
+                  <div class="lane-head">Marketing Line</div>
+                  <article class="node assistant" id="node-marketing-lead" data-node data-person="marketinglead">
+                    <label class="avatar-slot empty" title="이미지 업로드"><input type="file" accept="image/*" class="avatar-input" onchange="handleAvatarUpload(event)" /></label>
+                    <div class="rank">Assistant Manager</div>
+                    <div class="name">Marketing Lead</div>
+                    <div class="role">PR / Marketing</div>
+                    <div class="duty">PR·마케팅 전략 수립<br>캠페인 실행 및 운영 리드</div>
+                    <div class="tag-row"></div>
+                  </article>
+                  <article class="node associate" id="node-marketing-associate" data-node data-person="marketingassociate">
+                    <label class="avatar-slot empty" title="이미지 업로드"><input type="file" accept="image/*" class="avatar-input" onchange="handleAvatarUpload(event)" /></label>
+                    <div class="rank">Associate</div>
+                    <div class="name">Marketing Associate</div>
+                    <div class="role">Marketing Execution</div>
+                    <div class="duty">콘텐츠 업로드·실행 지원<br>프로모션 결과 취합 관리</div>
+                    <div class="tag-row"></div>
+                  </article>
+                </div>
+
+                <div class="lane" id="lane-bd">
+                  <div class="lane-head">Business Development Support</div>
+                  <article class="node assistant matrix-eligible" id="node-bd" data-node data-person="bdsupport">
+                    <label class="avatar-slot empty" title="이미지 업로드"><input type="file" accept="image/*" class="avatar-input" onchange="handleAvatarUpload(event)" /></label>
+                    <div class="rank">Assistant Manager</div>
+                    <div class="name">Planning Support</div>
+                    <div class="role">Business Development Support</div>
+                    <div class="duty">사업개발 리서치 지원<br>자료 정리·후속 실행 관리</div>
+                    <div class="tag-row">
+                      <span class="tag matrix">Direct to Kyle</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </section>
+
+            <section class="part compact" id="part-operations">
+              <div class="part-title"><span class="dot"></span>Part 2 · Operations &amp; Support</div>
+              <div class="part-head">
+                <article class="node manager part-lead" id="node-faye" data-node data-person="faye">
+                  <div class="avatar-slot"><img src="https://i.postimg.cc/1VZKTBQG/Faye.png" alt="Faye 박민정" /></div>
+                  <div class="rank">Manager</div>
+                  <div class="name">Faye 박민정</div>
+                  <div class="role">Operations Lead</div>
+                  <div class="duty">운영 파트 총괄 리드<br>베트남 SV 운영 담당</div>
+                  <div class="tag-row">
+                    <span class="tag sv-badge">SV</span>
+                    <span class="tag country">🇻🇳 Vietnam</span>
+                  </div>
+                </article>
+              </div>
+
+              <div class="lane-grid operations">
+                <div class="lane" id="lane-export">
+                  <div class="lane-head">Export / Finance Line</div>
+                  <article class="node assistant matrix-eligible" id="node-export" data-node data-person="exportfinancelead">
+                    <label class="avatar-slot empty" title="이미지 업로드"><input type="file" accept="image/*" class="avatar-input" onchange="handleAvatarUpload(event)" /></label>
+                    <div class="rank">Assistant Manager</div>
+                    <div class="name">Export / Finance Lead</div>
+                    <div class="role">Export · Finance Lead</div>
+                    <div class="duty">수출·회계 운영 리드<br>물류·정산·계약 관리</div>
+                    <div class="tag-row">
+                      <span class="tag matrix">Direct to Kyle</span>
+                    </div>
+                  </article>
+                  <article class="node associate" id="node-mason" data-node data-person="mason">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/xNyPSmfL/Mason.jpg" alt="Mason 민수기" /></div>
+                    <div class="rank">Associate</div>
+                    <div class="name">Mason 민수기</div>
+                    <div class="role">Export · Accounting · Purchasing Support</div>
+                    <div class="duty">수출·회계 실무 지원<br>구매 및 운영 지원</div>
+                    <div class="tag-row"></div>
+                  </article>
+                </div>
+
+                <div class="lane" id="lane-sv">
+                  <div class="lane-head">Store Supervision Line</div>
+                  <article class="node assistant" id="node-moel" data-node data-person="moel">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/gLqKPhz4/Moel.jpg" alt="Moel 김수민" /></div>
+                    <div class="rank">Assistant Manager</div>
+                    <div class="name">Moel 김수민</div>
+                    <div class="role">Store Supervisor</div>
+                    <div class="duty">캐나다 매장 운영 점검<br>파트너 관리·현장 대응</div>
+                    <div class="tag-row">
+                      <span class="tag sv-badge">SV</span>
+                      <span class="tag country">🇨🇦 Canada</span>
+                    </div>
+                  </article>
+                  <article class="node associate" id="node-braun" data-node data-person="braun">
+                    <div class="avatar-slot"><img src="https://i.postimg.cc/BPGCyp0P/Braun.png" alt="Braun 김태웅" /></div>
+                    <div class="rank">Associate</div>
+                    <div class="name">Braun 김태웅</div>
+                    <div class="role">Store Supervisor</div>
+                    <div class="duty">요르단 매장 운영 점검<br>교육 실행·현장 지원</div>
+                    <div class="tag-row">
+                      <span class="tag sv-badge">SV</span>
+                      <span class="tag country">🇯🇴 Jordan</span>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider-note">이미지는 Postimg CDN 링크로 연결되어 있어 어느 기기에서 열어도 동일하게 표시됩니다.</div>
+
+    <aside class="tooltip-panel" id="tooltipPanel" aria-live="polite">
+      <div class="tooltip-eyebrow">Core R&amp;R</div>
+      <div class="tooltip-name" id="tooltipName">Kyle 강길호</div>
+      <div class="tooltip-role" id="tooltipRole">Head of Overseas Business</div>
+      <ul class="tooltip-list" id="tooltipList"></ul>
+    </aside>
+  </div>
+
+  <script>
+    const root = document.getElementById('chartRoot');
+    const svg = document.getElementById('lineLayer');
+    const shell = document.getElementById('chartShell');
+    const viewport = document.getElementById('chartViewport');
+    const zoomIndicator = document.getElementById('zoomIndicator');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const zoomResetBtn = document.getElementById('zoomResetBtn');
+
+    const solidConnections = [
+      ['node-kyle', 'node-leah'],
+      ['node-kyle', 'node-faye'],
+      ['node-leah', 'node-nina'],
+      ['node-leah', 'node-victor'],
+      ['node-leah', 'node-marketing-lead'],
+      ['node-leah', 'node-bd'],
+      ['node-nina', 'node-zoey'],
+      ['node-victor', 'node-jenna'],
+      ['node-marketing-lead', 'node-marketing-associate'],
+      ['node-faye', 'node-export'],
+      ['node-export', 'node-mason'],
+      ['node-faye', 'node-moel'],
+      ['node-moel', 'node-braun']
+    ];
+
+    const dashedConnections = [
+      ['node-kyle', 'node-bd'],
+      ['node-kyle', 'node-export']
+    ];
+
+    function getAnchor(id, type) {
+      const target = document.getElementById(id);
+      const rootRect = root.getBoundingClientRect();
+      const rect = target.getBoundingClientRect();
+      return {
+        x: rect.left - rootRect.left + rect.width / 2,
+        y: type === 'top' ? rect.top - rootRect.top : rect.bottom - rootRect.top
+      };
+    }
+
+    function createPath(fromId, toId, mode) {
+      const start = getAnchor(fromId, 'bottom');
+      const end = getAnchor(toId, 'top');
+      const gapY = Math.max(54, (end.y - start.y) * 0.5);
+      const gapX = Math.abs(end.x - start.x) * 0.14;
+      const dir = end.x >= start.x ? 1 : -1;
+      const d = [
+        `M ${start.x} ${start.y}`,
+        `C ${start.x + gapX * dir} ${start.y + gapY}, ${end.x - gapX * dir} ${end.y - gapY}, ${end.x} ${end.y}`
+      ].join(' ');
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-width', mode === 'solid' ? '1.06' : '0.98');
+      path.setAttribute('stroke', mode === 'solid' ? 'var(--line-solid)' : 'var(--line-dashed)');
+      if (mode === 'dashed') {
+        path.setAttribute('stroke-dasharray', '5 7');
+      }
+      return path;
+    }
+
+    function renderConnections() {
+      const rect = root.getBoundingClientRect();
+      svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+      svg.setAttribute('width', rect.width);
+      svg.setAttribute('height', rect.height);
+      svg.innerHTML = '';
+
+      const solidLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      const dashedLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      svg.appendChild(solidLayer);
+      svg.appendChild(dashedLayer);
+
+      solidConnections.forEach(([fromId, toId]) => {
+        solidLayer.appendChild(createPath(fromId, toId, 'solid'));
+      });
+
+      dashedConnections.forEach(([fromId, toId]) => {
+        dashedLayer.appendChild(createPath(fromId, toId, 'dashed'));
+      });
+    }
+
+    let currentScale = 1;
+    const MIN_SCALE = 0.7;
+    const MAX_SCALE = 1.45;
+    const SCALE_STEP = 0.1;
+
+    function updateZoomUi() {
+      zoomIndicator.textContent = `${Math.round(currentScale * 100)}%`;
+    }
+
+    function applyZoom(nextScale, centerInShell = true) {
+      currentScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, nextScale));
+      viewport.style.transform = `scale(${currentScale})`;
+      const scaledWidth = root.scrollWidth * currentScale;
+      const scaledHeight = root.scrollHeight * currentScale;
+      viewport.style.width = `${scaledWidth}px`;
+      viewport.style.height = `${scaledHeight}px`;
+      updateZoomUi();
+      scheduleRenderConnections();
+      if (centerInShell) {
+        const targetLeft = Math.max(0, (scaledWidth - shell.clientWidth) / 2);
+        shell.scrollLeft = targetLeft;
+      }
+    }
+
+    let resizeFrame = null;
+    function scheduleRenderConnections() {
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        renderConnections();
+        resizeFrame = null;
+      });
+    }
+
+    const rrData = {
+      kyle: {
+        name: 'Kyle 강길호',
+        role: 'Head of Overseas Business',
+        items: [
+          '글로벌 진출 전략 수립 및 실행 총괄',
+          '신규 국가 구조 설계 및 진출 로드맵 기획',
+          '계약 조건 협상 및 라이선싱 기준 수립, HQ 승인 보고',
+          '글로벌 파트너십 발굴, 관계 유지 및 위기관리',
+          'HQ와 해외 파트너 간 전략 연계 및 실행 방향 조율',
+          '조직 예산, 일정, 인력 배분 등 자원 최적화',
+          '국가별 신규 사업 운영 프로젝트 관리',
+          '조직 역량 강화 및 팀원 멘토링 주도'
+        ]
+      },
+      leah: {
+        name: 'Leah 권수정',
+        role: 'Planning / BD / Branding Lead',
+        items: [
+          '국가별 진입 전략 및 진출 방식(DF·MF·JV) 기획',
+          '신규 국가 진출 타당성 조사 및 파트너 적합성 평가',
+          '브랜드·메뉴 전략 수립 및 HQ·글로벌 진출 모델 정렬 검토',
+          '로컬라이징 및 브랜딩 구조 설계, 실행 우선순위 설정',
+          '시장 및 경쟁사 분석 및 신규 진출 기회 발굴',
+          '브랜드 일관성 검증 및 글로벌 브랜드 자산 관리',
+          '전략 분석 리포트 작성 및 HQ 공유',
+          '브랜드 스토리텔링 및 글로벌 커뮤니케이션 주도'
+        ]
+      },
+      nina: {
+        name: 'Nina 김수연',
+        role: 'Menu Strategy',
+        items: [
+          '국가별 소비 트렌드를 반영한 메뉴 전략 수립 및 출시 로드맵 관리',
+          '원재료 검토 및 원가·수익성 분석, 개선안 제안',
+          '판매 성과 분석 통한 메뉴 IN·OUT 검토 및 국가별 라인업 최적화',
+          '현지 파트너 피드백 반영과 메뉴 개선 실행',
+          '메뉴 포트폴리오 관리 및 가격 정책 운영',
+          '시즌별 메뉴 전략 기획과 출시 일정 관리',
+          '글로벌 신제품 콘셉트 기획 및 실행'
+        ]
+      },
+      zoey: {
+        name: 'Zoey 황윤전',
+        role: 'Menu Development',
+        items: [
+          '글로벌 메뉴 포트폴리오 수립 및 옵션·사이드 구성, 시장성 검토',
+          '메뉴 개발·테스트 및 검증–확정 프로세스 운영',
+          '현지 원재료 소싱·테스트, HQ 대비 비교 평가 및 공급망·원가 전략 수립',
+          'HQ 기준 품질 적합성 검증, 테스트 기반 개선 및 출시 후 품질 유지',
+          '제조·운영 매뉴얼 개발 및 업데이트, 신규 메뉴 교육 운영',
+          '국가별 제조 표준 고도화, 메뉴 수익성 분석 및 전략 반영',
+          '메뉴 출시 관련 마케팅·디자인 협업, 수급 일정 조율 및 리스크 대응'
+        ]
+      },
+      victor: {
+        name: 'Victor 조용선',
+        role: 'Interior Design',
+        items: [
+          '글로벌 인테리어 디자인 기준 수립 및 매뉴얼 관리',
+          '해외 매장 인테리어 레이아웃 및 설계안 검토·승인',
+          '진출 방식(DF·MF·JV)별 인테리어 적용 범위 및 통제 기준 정의',
+          '매장 공간 내 브랜드 아이덴티티 및 고객 경험 일관성 관리',
+          '해외 현지 시공 감리 및 설계 기준 준수 여부 관리',
+          '인테리어 예산(CAPEX), 일정 및 품질 관리',
+          '현지 시공·자재 벤더 관리 및 인허가·리노베이션 조율'
+        ]
+      },
+      jenna: {
+        name: 'Jenna 김정은',
+        role: 'Design',
+        items: [
+          '브랜드 시각 자산(BI, 패키지, POP) 기획 및 설계',
+          '글로벌·현지 디자인 키트 제작 및 실행 가이드 정리',
+          '프로모션 및 메뉴 비주얼 개발',
+          '신규 매장 오픈 디자인 검수 및 피드백 제공',
+          'HQ 디자인팀 협업 및 시각 품질 기준 유지',
+          'SNS 및 디지털 콘텐츠 비주얼 관리',
+          '파트너 제공용 브랜드 디자인 어셋 관리'
+        ]
+      },
+      marketinglead: {
+        name: 'Marketing Lead',
+        role: 'PR / Marketing',
+        items: [
+          'PR·마케팅 전략 및 실행 리드',
+          '캠페인 일정 및 콘텐츠 운영 총괄',
+          '현지 채널 운영 방향 수립 및 실행 관리'
+        ]
+      },
+      marketingassociate: {
+        name: 'Marketing Associate',
+        role: 'Marketing Execution',
+        items: [
+          '콘텐츠 업로드 및 실행 운영 지원',
+          '프로모션 일정 및 결과 취합',
+          '실무 산출물 정리 및 채널 운영 보조'
+        ]
+      },
+      bdsupport: {
+        name: 'Planning Support',
+        role: 'Business Development Support',
+        items: [
+          '사업개발 파트 리서치 및 문서 정리 지원',
+          '파트너 커뮤니케이션 자료 및 회의 아젠다 지원',
+          'BD 파이프라인 운영 및 후속 액션 트래킹'
+        ]
+      },
+      faye: {
+        name: 'Faye 박민정',
+        role: 'Operations Lead / Vietnam SV',
+        items: [
+          '해외 매장 오픈 프로세스 기획 및 실행 관리',
+          '현지 직원 교육 및 트레이닝 체계 운영',
+          '매장 운영 품질(QSC·SOP) 점검 및 개선 관리',
+          '메뉴 레시피 운영 검수 및 원가·품질 관리',
+          '판매 실적 및 수익성 데이터 분석, 개선안 도출',
+          '지역 매출 활성화를 위한 LSM 기획 및 실행',
+          '파트너 운영 이슈 관리 및 HQ 협업 대응'
+        ]
+      },
+      exportfinancelead: {
+        name: 'Export / Finance Lead',
+        role: 'Export · Finance Lead',
+        items: [
+          '수출·회계 리드 및 운영 기준 정리',
+          '국가별 수출 프로세스 및 물류 흐름 관리',
+          '수출 관련 정산·문서·계약 관리'
+        ]
+      },
+      mason: {
+        name: 'Mason 민수기',
+        role: 'Export · Accounting · Purchasing Support',
+        items: [
+          '수출 프로세스 운영 지원 및 선적 일정 관리',
+          '수출 관련 정산 자료 정리 및 회계 실무 지원',
+          '구매 발주 요청 취합 및 발주 진행 지원',
+          '수출입 관련 문서 작성 및 파일링 관리',
+          '물류·통관 진행 현황 확인 및 이슈 대응 지원',
+          '해외 운영 지원 관련 문서·비용·정산 업무 수행'
+        ]
+      },
+      moel: {
+        name: 'Moel 김수민',
+        role: 'Store Supervisor / Canada SV',
+        items: [
+          '캐나다 신규 매장 오픈 준비 및 실행 조율',
+          '파트너 운영 관리 및 매출 성과 점검·피드백 제공',
+          '현지 스태프 트레이닝 운영 및 평가 지원',
+          'SOP 기반 매장 운영 품질 점검 및 개선 지원',
+          '매장 운영 리포트 작성 및 HQ 보고',
+          '지역 매출 활성화를 위한 LSM 기획 및 실행',
+          '파트너 커뮤니케이션 및 운영 이슈 대응'
+        ]
+      },
+      braun: {
+        name: 'Braun 김태웅',
+        role: 'Store Supervisor / Jordan SV',
+        items: [
+          '요르단 신규 매장 오픈 준비 및 실행 조율',
+          '파트너 운영 관리 및 매출 성과 점검·피드백 제공',
+          '현지 스태프 트레이닝 운영 및 평가 지원',
+          'SOP 기반 매장 운영 품질 점검 및 개선 지원',
+          '매장 운영 리포트 작성 및 HQ 보고',
+          '지역 매출 활성화를 위한 LSM 기획 및 실행',
+          '파트너 커뮤니케이션 및 운영 이슈 대응'
+        ]
+      }
+    };
+
+    const tooltipName = document.getElementById('tooltipName');
+    const tooltipRole = document.getElementById('tooltipRole');
+    const tooltipList = document.getElementById('tooltipList');
+
+    function updateTooltip(key) {
+      const data = rrData[key];
+      if (!data) return;
+      tooltipName.textContent = data.name;
+      tooltipRole.textContent = data.role;
+      tooltipList.innerHTML = data.items.map(item => `<li>${item}</li>`).join('');
+    }
+
+    document.querySelectorAll('[data-person]').forEach(node => {
+      const key = node.dataset.person;
+      node.addEventListener('mouseenter', () => updateTooltip(key));
+      node.addEventListener('focus', () => updateTooltip(key));
+      node.addEventListener('click', () => updateTooltip(key));
+    });
+
+        zoomInBtn.addEventListener('click', () => applyZoom(currentScale + SCALE_STEP, false));
+    zoomOutBtn.addEventListener('click', () => applyZoom(currentScale - SCALE_STEP, false));
+    zoomResetBtn.addEventListener('click', () => applyZoom(1, true));
+
+    shell.addEventListener('wheel', (event) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      event.preventDefault();
+      const direction = event.deltaY < 0 ? SCALE_STEP : -SCALE_STEP;
+      applyZoom(currentScale + direction, false);
+    }, { passive: false });
+
+    window.addEventListener('load', () => {
+      applyZoom(1, true);
+      updateTooltip('kyle');
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => applyZoom(currentScale, false));
+      }
+    });
+    window.addEventListener('resize', scheduleRenderConnections);
+    shell.addEventListener('scroll', scheduleRenderConnections, { passive: true });
+
+    const resizeObserver = new ResizeObserver(() => scheduleRenderConnections());
+    resizeObserver.observe(root);
+    document.querySelectorAll('[data-node]').forEach(node => resizeObserver.observe(node));
+  </script>
+</body>
+</html>
